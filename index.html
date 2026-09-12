@@ -6,7 +6,7 @@
     <title>Clock & Weather</title>
     <style>
         :root {
-            --bg-color: #0f172a;
+            --bg-color: #000;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
             --accent-glow: rgba(56, 189, 248, 0.15);
@@ -62,18 +62,6 @@
             font-weight: 300;
         }
 
-        .weather-box {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            min-height: 2em;
-        }
-
-        .weather-icon {
-            font-size: 1.2em;
-        }
-
         /* おやすみボタン */
         .sleep-btn {
             margin-top: 2rem;
@@ -114,14 +102,13 @@
         <!-- 時刻 -->
         <div class="time" id="clock">00:00:00</div>
         
-        <!-- 日付 & 天気 -->
+        <!-- 日付 -->
         <div class="sub-info">
             <div id="date">----年--月--日 (--)</div>
-            <div class="weather-box" id="weather">天気情報を取得中...</div>
         </div>
 
         <!-- おやすみボタン -->
-        <button class="sleep-btn" id="sleepBtn">🌙 おやすみモード</button>
+        <button class="sleep-btn" id="sleepBtn">sleep</button>
     </div>
 
     <script>
@@ -146,58 +133,7 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // --- 2. 天気予報API (Open-Meteo & 位置情報API) ---
-        // WMO天候コードを日本語表記と絵文字に変換
-        function getWeatherDetails(code) {
-            const mapping = {
-                0: { text: "快晴", icon: "☀️" },
-                1: { text: "晴れ", icon: "🌤️" },
-                2: { text: "一部曇り", icon: "⛅" },
-                3: { text: "くもり", icon: "☁️" },
-                45: { text: "霧", icon: "🌫️" },
-                51: { text: "霧雨", icon: "🌧️" },
-                61: { text: "雨", icon: "☔" },
-                71: { text: "雪", icon: "❄️" },
-                95: { text: "雷雨", icon: "🌩️" }
-            };
-            return mapping[code] || { text: "雨/くもり", icon: "🌧️" };
-        }
-
-        async function fetchWeather() {
-            const weatherEl = document.getElementById('weather');
-            try {
-                // ① IPアドレスから自動で現在地を取得（権限ポップアップ不要のAPIを使用）
-                const geoRes = await fetch('https://ipapi.co/json/');
-                const geoData = await geoRes.json();
-                const lat = geoData.latitude || 35.6762; // 取得失敗時は東京
-                const lon = geoData.longitude || 139.6503;
-                const city = geoData.city || "現在地";
-
-                // ② 無料のOpen-Meteo APIから天気と気温を取得（APIキー不要）
-                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`);
-                const weatherData = await weatherRes.json();
-                
-                const current = weatherData.current_weather;
-                const weatherInfo = getWeatherDetails(current.weathercode);
-                const temp = Math.round(current.temperature);
-
-                // 画面に反映
-                weatherEl.innerHTML = `
-                    <span>${city}:</span>
-                    <span class="weather-icon">${weatherInfo.icon}</span>
-                    <span>${weatherInfo.text}</span>
-                    <span>${temp}°C</span>
-                `;
-            } catch (error) {
-                console.error("天気データの取得に失敗しました:", error);
-                weatherEl.textContent = "天気を取得できませんでした";
-            }
-        }
-        fetchWeather();
-        // 1時間に1回天気を更新
-        setInterval(fetchWeather, 3600000);
-
-        // --- 3. おやすみモード機能 ---
+        // --- 2. おやすみモード機能 ---
         const sleepBtn = document.getElementById('sleepBtn');
         const body = document.body;
 
