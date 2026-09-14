@@ -2,8 +2,13 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clock & Weather</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="シンプルな時計とおやすみモードのWebアプリ">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Clock</title>
     <style>
         :root {
             --bg-color: #ffffff;
@@ -30,6 +35,8 @@
             align-items: center;
             overflow: hidden;
             transition: background-color 0.5s ease;
+            padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* メインコンテンツ配置 */
@@ -83,6 +90,29 @@
             transform: translateY(-2px);
         }
 
+        .sleep-btn:focus-visible {
+            outline: 2px solid var(--text-sub);
+            outline-offset: 4px;
+        }
+
+        .app-actions {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 0.25rem;
+        }
+
+        .app-btn {
+            padding: 0.6rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 999px;
+            background: #fff;
+            color: var(--text-sub);
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .app-btn:hover { color: var(--text-main); }
+
         /* おやすみモード（真っ黒画面）の設定 */
         body.sleep-mode {
             background-color: #000000;
@@ -109,6 +139,9 @@
 
         <!-- おやすみボタン -->
         <button class="sleep-btn" id="sleepBtn">sleep</button>
+        <div class="app-actions">
+            <button class="app-btn" id="fullscreenBtn" type="button">全画面</button>
+        </div>
     </div>
 
     <script>
@@ -136,6 +169,7 @@
         // --- 2. おやすみモード機能 ---
         const sleepBtn = document.getElementById('sleepBtn');
         const body = document.body;
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
 
         // おやすみボタンを押したとき
         sleepBtn.addEventListener('click', (e) => {
@@ -148,6 +182,30 @@
             if (body.classList.contains('sleep-mode')) {
                 body.classList.remove('sleep-mode');
             }
+        });
+
+        // Webアプリとしての全画面表示（対応ブラウザのみ）
+        fullscreenBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.warn('Fullscreen is not available.', error);
+            }
+        });
+
+        // キーボードやタップでもおやすみモードを操作可能にする
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 's' || e.key === ' ') {
+                e.preventDefault();
+                if (!body.classList.contains('sleep-mode')) sleepBtn.click();
+                else body.classList.remove('sleep-mode');
+            }
+            if (e.key === 'Escape') body.classList.remove('sleep-mode');
         });
     </script>
 </body>
