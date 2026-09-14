@@ -95,24 +95,6 @@
             outline-offset: 4px;
         }
 
-        .app-actions {
-            display: flex;
-            gap: 0.6rem;
-            margin-top: 0.25rem;
-        }
-
-        .app-btn {
-            padding: 0.6rem 1rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 999px;
-            background: #fff;
-            color: var(--text-sub);
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        .app-btn:hover { color: var(--text-main); }
-
         /* おやすみモード（真っ黒画面）の設定 */
         body.sleep-mode {
             background-color: #000000;
@@ -139,9 +121,6 @@
 
         <!-- おやすみボタン -->
         <button class="sleep-btn" id="sleepBtn">sleep</button>
-        <div class="app-actions">
-            <button class="app-btn" id="fullscreenBtn" type="button">全画面</button>
-        </div>
     </div>
 
     <script>
@@ -169,7 +148,6 @@
         // --- 2. おやすみモード機能 ---
         const sleepBtn = document.getElementById('sleepBtn');
         const body = document.body;
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
 
         // おやすみボタンを押したとき
         sleepBtn.addEventListener('click', (e) => {
@@ -178,25 +156,13 @@
         });
 
         // 画面のどこかをタップ/クリックしたとき（戻る処理）
-        window.addEventListener('click', () => {
+        const wakeFromSleep = () => {
             if (body.classList.contains('sleep-mode')) {
                 body.classList.remove('sleep-mode');
             }
-        });
-
-        // Webアプリとしての全画面表示（対応ブラウザのみ）
-        fullscreenBtn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            try {
-                if (!document.fullscreenElement) {
-                    await document.documentElement.requestFullscreen();
-                } else {
-                    await document.exitFullscreen();
-                }
-            } catch (error) {
-                console.warn('Fullscreen is not available.', error);
-            }
-        });
+        };
+        window.addEventListener('click', wakeFromSleep);
+        window.addEventListener('touchend', wakeFromSleep, { passive: true });
 
         // キーボードやタップでもおやすみモードを操作可能にする
         document.addEventListener('keydown', (e) => {
